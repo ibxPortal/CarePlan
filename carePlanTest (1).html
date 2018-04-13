@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Care Plan
+</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/themes/smoothness/jquery-ui.css"></script> 
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"  rel = "stylesheet">
+<script src = "https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.23/themes/redmond/jquery-ui.css">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<link rel="stylesheet" href="/style.css">
+<script src="/main.js"></script>
+
+<script>
+$(function() {
+var careplanURL = 'https://dcpeozkdul.execute-api.us-east-1.amazonaws.com/deployApp/appointment';
+	var communicationId = (Math.random().toString(36)).substring(2,12);
+	var correlationId = "d6aedfqJLxa231";
+	var cp_id = "d6aedfqcd4";
+	var xray_id = (Math.random().toString(36)).substring(2,9);
+	var med_id = (Math.random().toString(36)).substring(2,9);
+	var walk_id = (Math.random().toString(36)).substring(2,9);
+	var ortho_id = (Math.random().toString(36)).substring(2,9);
+	var ice_id = (Math.random().toString(36)).substring(2,9);
+	var mob_id = (Math.random().toString(36)).substring(2,9);
+	var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+	var event_id = (Math.random().toString(36)).substring(2,9);
+	var type=" ";
+	var messageHeader = {
+		alert : {
+		  header : {
+			resourceType : "Communication",
+			identifier : communicationId,
+			correlationId : correlationId,
+			sender : "kandiakhila93@gmail.com",
+			status : "active",
+			sent : dateTime,
+			category : "notification",
+			scope : "private",
+			restriction : "Optional",
+			topic : "Address",
+			note : $('#pID').text()+"-"+$('#fname').text()+"'s "+$('#careplan').text()+" CarePlan",
+			partOf : "CarePlan"
+		  }
+		}
+	}
+	
+	var carePlan = {
+		carePlan : {
+			identifier : cp_id,
+			category : "notification",
+			intent : "plan",
+			title : $('#careplan').text(),
+			description : "careplan for "+$('#careplan').text(),
+			status : "active"
+		}
+	}
+$("#orthoDialog").dialog({
+    autoOpen  : false,
+    modal     : true,
+    title     : "Ortho Specialist Appointment",
+	height    :  300,
+	width     :  500,
+    buttons   : {
+              'Confirm Appointment' : function() {
+				  var msg= "";
+				  if($('#orthoPhyName').val() == "")msg = msg+"Please enter Ortho Specialist name.\n";
+				  if($('#orthoLoc').val() == "")msg = msg+ "Please enter location for your appointment\n";
+				  if($('#orthoTime').val() == "") msg= msg+"Please choose date and time for your appointment.\n";
+				  if(msg != ""){
+					alert(msg)
+				  }else{
+					  type="ortho";
+					  $(this).dialog('close');
+					  var textValue = $('#orthoPhyName').val() ;
+					  document.getElementById("demo6").innerHTML = "Physician Name: "+textValue+" | Appointment Location: "+$('#orthoLoc').val()+" | Scheduled Time: "+$('#orthoTime').val(); 
+					  document.getElementById("orthoSwitch1").style.display="block";
+					  document.getElementById("edit2").style.display="block";
+					  sendObject();
+					  alert("You have successfully scheduled an appointment with your Ortho Specialist, Dr."+$('#orthoPhyName').val()+".");
+                  }
+				 //Now you have the value of the textbox, you can do something with it, maybe an AJAX call to your server!
+              },
+              'Cancel' : function() {
+                  $(this).dialog('close');
+              }
+                }
+});
+
+//Open the dialog box when the button is clicked.
+$('#orthoSwitch').click(function() {
+    if($('#reminderType6').val() == " "){
+		   alert("Please choose your notification preference!")
+	}else{ 
+		if($('#reminderType6').val() == "Web"){
+			$("#orthoDialog").dialog("open");
+		}else{
+		alert("A "+$('#reminderType6').val()+" Notification for scheduling Ortho Specialist Visit has been sent!")
+		type="ortho";
+		sendObject();
+		}
+	}
+});
+
+$('#orthoSwitch1').click(function() {
+    if($('#reminderType6').val() == " "){
+		   alert("Please choose your notification preference!")
+	}else{
+		if($('#reminderType6').val() == "Web"){
+	     	$("#orthoDialog").dialog("open");
+		}else{
+			alert("A "+$('#reminderType6').val()+" Notification for scheduling Ortho Specialist Visit has been sent!")
+			type = "ortho";
+			sendObject();
+		}
+	}
+});
+	
+
+$("#walkDialog").dialog({
+    autoOpen  : false,
+    modal     : true,
+    title     : "Walk Reminder",
+	height    :  250,
+	width     :  350,
+    buttons   : {
+              'Set Reminder' : function() {
+			    var textValue = $('#reminderType5').val();
+				if(textValue == " "){
+					alert("Please choose your notification preference!")
+				}else{
+				  if($('#walkNotification').val() == " "){
+					alert("Please choose if you want notified.")
+				  }else{
+					  type = "walk";
+					  sendObject();
+					  $(this).dialog('close');
+					  var textValue = $('#walkNotification').val() ;
+					  if(textValue == "Yes") {
+						textValue = "Walk Reminder Set!";
+					  }else textValue = "Walk Reminder Not Set!";
+					  document.getElementById("demo5").innerHTML = "User Response : "+textValue;
+					  }
+				  }
+                 //Now you have the value of the textbox, you can do something with it, maybe an AJAX call to your server!
+              },
+              'Cancel' : function() {
+                  $(this).dialog('close');
+              }
+                }
+});
+
+//Open the dialog box when the button is clicked.
+$('#walkSwitch').click(function() {
+	if($('#reminderType5').val() == " "){
+		   alert("Please choose your notification preference!")
+	  }else{
+	  if($('#reminderType5').val() == "Web"){
+		$("#walkDialog").dialog("open");
+	  }else{
+		type="walk";
+		sendObject();
+		alert("A "+$('#reminderType5').val()+" Notification for Walk Reminder has been set!");
+	  }
+	  
+	  }
+});
+$("#medDialog").dialog({
+    autoOpen  : false,
+    modal     : true,
+    title     : "Medication Reminder",
+	height    :  250,
+	width     :  350,
+    buttons   : {
+              'Set Reminder' : function() {
+                  var textValue = $('#medicationAlert').val() ;
+				  if(textValue == " "){
+					alert("Please choose when you want to be reminded!");
+				  }else{
+					  type="med";
+					  sendObject();
+					  var h = "hours";
+					  if(textValue=="1"){
+						h = "hour";
+					  }
+					  document.getElementById("demo4").innerHTML = "User Response : Reminder set for every "+textValue+" "+h+"!";
+					  $(this).dialog('close');
+					  }
+				 //Now you have the value of the textbox, you can do something with it, maybe an AJAX call to your server!
+              }, 
+              'Cancel' : function() {
+                  $(this).dialog('close');
+              }
+                }
+});
+
+//Open the dialog box when the button is clicked.
+$('#medSwitch').click(function() {
+	  if($('#reminderType4').val() == " "){
+		   alert("Please choose your notification preference!")
+	  }else{
+	  if($('#reminderType4').val() == "Web"){
+		$("#medDialog").dialog("open");
+	  }else{
+	   alert("A "+$('#reminderType4').val()+" Reminder for Medication has been set!");
+	   type="med";
+	   sendObject();
+	  }
+	  }
+});
+$("#myDialog").dialog({
+    autoOpen  : false,
+    modal     : true,
+    title     : "Xray Schedule",
+	height    :  300,
+	width     :  500,
+    buttons   : {
+              'Confirm Appointment' : function() {
+				  var msg= "";
+				  if($('#phyName').val() == "")msg = msg+"Please enter Physician name.\n";
+				  if($('#loc').val() == "")msg = msg+ "Please enter location for your appointment\n";
+				  if($('#time').val() == "") msg= msg+"Please choose date and time for your appointment.\n";
+				  if(msg != ""){
+					alert(msg)
+				  }else{
+					  type="xray";
+					  $(this).dialog('close');
+					  document.getElementById("xraySwitch1").style.display="block";
+					  document.getElementById("edit1").style.display="block";
+					  var textValue = $('#phyName').val() ;
+					  document.getElementById("demo3").innerHTML = "Physician Name: "+textValue+" | Appointment Location: "+$('#loc').val()+" | Scheduled Time: "+$('#time').val(); 
+					  sendObject();
+					  alert("You have successfully scheduled your Xray Appointment!");
+                  }
+				 //Now you have the value of the textbox, you can do something with it, maybe an AJAX call to your server!
+              },
+              'Cancel' : function() {
+                  $(this).dialog('close');
+              }
+                }
+});
+
+//Open the dialog box when the button is clicked.
+$('#xraySwitch').click(function() {
+    if($('#reminderType3').val() == " "){
+		   alert("Please choose your notification preference!")
+	}else{ 
+		if($('#reminderType3').val() == "Web"){
+			$("#myDialog").dialog("open");
+		}else{
+		alert("A "+$('#reminderType3').val()+" Notification for scheduling Xray Appointment has been sent!")
+		type="xray";
+		sendObject();
+		}
+	}
+});
+
+$('#xraySwitch1').click(function() {
+    if($('#reminderType3').val() == " "){
+		   alert("Please choose your notification preference!")
+	}else{
+		if($('#reminderType3').val() == "Web"){
+	     	$("#myDialog").dialog("open");
+		}else{
+			alert("A "+$('#reminderType3').val()+" Notification for scheduling Xray Appointment has been sent!")
+			type = "xray";
+			sendObject();
+		}
+	}
+});
+
+var mobility;
+$("#mobilityDialog").dialog({
+    autoOpen  : false,
+    modal     : true,
+    title     : "Evaluate Mobility",
+	height    :  200,
+	width     :  400,
+    buttons   : {
+              'Ok' : function() {
+			  $(this).dialog('close');
+                  mobility = $('#mobility').val() ;
+				  if(mobility != "") document.getElementById("demo2").innerHTML = "User Response: "+mobility; 
+				  sendObject();
+                 //Now you have the value of the textbox, you can do something with it, maybe an AJAX call to your server!
+              },
+              'Cancel' : function() {
+                  $(this).dialog('close');
+              }
+                }
+});
+
+//Open the dialog box when the button is clicked.
+$('#switch-02').click(function() {
+	
+	if($('#reminderType2').val() == " "){
+		   alert("Please choose your notification preference!")
+	  }else if($('#reminderType2').val() == "Web"){
+	  type="mobility";
+      $("#mobilityDialog").dialog("open");
+	  }else{
+	  type="mobility";
+	  alert($('#reminderType2').val()+" Notification Sent!")
+	  sendObject();
+	  }
+});
+var appliedIceUserResponse="yes";
+
+$("#dialog").dialog({
+     autoOpen: false,
+     modal: true,
+	 title: "Applied Ice pack?",
+	 height:  200,
+     buttons : {
+          "Yes" : function() {
+			$(this).dialog("close");		
+			document.getElementById("demo").innerHTML ="User Response: Yes";
+			appliedIceUserResponse = "Yes";
+			sendObject();
+          },
+          "No" : function() {
+            $(this).dialog("close");
+			document.getElementById("demo").innerHTML ="User Response: No";
+			appliedIceUserResponse = "No";
+			sendObject("ice");
+          }
+        }
+      });
+
+  $("#callConfirm").on("click", function(e) {
+      e.preventDefault();
+	  if($('#reminderType1').val() == " "){
+		   alert("Please choose your notification preference!")
+	  }else if($('#reminderType1').val() == "Web"){
+	  type="ice";
+      $("#dialog").dialog("open");
+	  }else{
+	  type="ice";
+	  alert($('#reminderType1').val()+" Notification Sent!")
+	  sendObject();
+	  }
+  });
+  
+  function sendObject(){
+   var obj={}; 
+   if(type == "ice"){
+		var appliedIce ={
+				 carePlan : {
+					event_id : ice_id,
+					appliedIce : $('#reminderType1').val() == "Web" ? appliedIceUserResponse : "yet to be taken",
+					contact : document.getElementById('reminderType1').value
+				 }
+		}
+			$.extend(appliedIce.carePlan, carePlan.carePlan)
+			$.extend(appliedIce, messageHeader)
+			obj = appliedIce
+	}else if(type == "mobility"){
+		var temp ={
+				 carePlan : {
+				    event_id : mob_id,
+					mobility : $('#reminderType2').val() == "Web" ? mobility : "yet to be taken",
+					contact : document.getElementById('reminderType2').value
+				 }
+		}
+			$.extend(temp.carePlan, carePlan.carePlan)
+			$.extend(temp, messageHeader)
+			obj = temp
+	}else if(type == "xray") {
+		var temp = {
+			appointment : {
+				identifier : xray_id,
+				intent :  "plan",
+				status : "pending",
+				description : "Xray Appointment"
+			}
+		}
+		var xrayTmp = {
+			activity : {
+				priority : "routine",
+				severity : "moderate",
+				certainty : "possible",
+				created : dateTime,
+				headline : "Xray Appointment Scheduling",
+				description : $('#fname').text()+"'s - Xray Appointment",
+				instruction : "Trigger notification for Xray Appointment",
+				notificationMessage : "Hi, "+$('#fname').text()+",\nYou have an Xray Appointment scheduled on "+$('#time').val()+" with Dr."+$('#phyName').val()+" in "+$('#loc').val()+".",
+				contact : document.getElementById('reminderType3').value,				
+				physicianName : $('#reminderType3').val() == "Web" ? $('#phyName').val() : "yet to be taken",
+				location : $('#reminderType3').val() == "Web" ? $('#loc').val() : "yet to be taken",
+				start : $('#reminderType3').val() == "Web" ? $('#time').val() : "yet to be taken"
+			}
+		}
+		$.extend(temp,xrayTmp)
+		$.extend(temp,carePlan)
+		$.extend(temp,messageHeader)
+		obj = temp;
+		
+	}else if(type == "med"){
+		var temp = {
+			task : {
+				identifier : med_id,
+				intent :  "plan",
+				status : "pending",
+				description : "Medication Reminder"
+			}
+		}
+		var medTmp = {
+			activity : {
+				priority : "routine",
+				severity : "moderate",
+				certainty : "possible",
+				created : dateTime,
+				headline : "Medication Reminder",
+				description : $('#fname').text()+"'s - Medication reminder",
+				instruction : "Trigger notification for Medication",
+				product : $('drugName').val(),
+				notificationMessage : "Hi Thanks for setting medication reminder",
+				dailyAmount : 6,
+				quantity : 0,
+				scheduledTime : $('#reminderType4').val() == "Web" ? $('#medicationAlert').val() : "yet to be taken",
+				contact : document.getElementById('reminderType4').value
+			}
+		}
+		$.extend(temp,medTmp);
+		$.extend(temp,carePlan);
+		$.extend(temp,messageHeader);
+		obj = temp;
+		}else if(type == "walk"){
+				var temp = {
+					task : {
+						identifier : walk_id,
+						intent :  "plan",
+						status : "pending",
+						description : "Walk Alert"
+					}
+				}
+				var walkTmp = {
+					activity : {
+						priority : "routine",
+						severity : "moderate",
+						certainty : "possible",
+						created : dateTime,
+						headline : "Walk Alert",
+						description : $('#fname').text()+"'s - Walk Alert",
+						instruction : "Trigger notification for Walk",
+						notificationMessage : "Hi Thanks for walk!",
+						contact : document.getElementById('reminderType5').value,
+						dailyAmount : "30 minutes",
+						userResponse : $('#reminderType5').val() == "Web" ? $('#walkNotification').val() : "yet to be taken",
+					}
+				}
+				$.extend(temp,walkTmp);
+				$.extend(temp,carePlan);
+				$.extend(temp,messageHeader);
+				obj=temp;
+		}else if(type == "ortho"){
+		var temp = {
+			appointment : {
+				identifier : ortho_id,
+				intent :  "plan",
+				status : "pending",
+				description : "Ortho Specialist Appointment"
+			}
+		}
+		var orthoTmp = {
+			activity : {
+				priority : "routine",
+				severity : "moderate",
+				certainty : "possible",
+				created : dateTime,
+				headline : "Ortho Specialist Appointment Scheduling",
+				description : $('#fname').text()+"'s - Ortho Specialist Appointment",
+				instruction : "Trigger notification for Ortho Specialist Appointment",
+				notificationMessage : "thanks for Ortho!",
+				start : $('#reminderType6').val() == "Web" ? $('#orthoTime').val() : "yet to be taken",
+				physicianName : $('#reminderType6').val() == "Web" ? $('#orthoPhyName').val() : "yet to be taken",
+				location : $('#reminderType6').val() == "Web" ? $('#orthoLoc').val() : "yet to be taken",
+				contact : document.getElementById('reminderType6').value
+			}
+		}
+		$.extend(temp,orthoTmp)
+		$.extend(temp,carePlan)
+		$.extend(temp,messageHeader)
+		obj = temp;
+	}
+			$.ajax({
+			  type: 'POST',
+			  url: careplanURL,
+			  contentType: 'application/json',
+			  data: JSON.stringify(obj),
+			  success: function () {
+			  },
+			  error: function (err) {
+				console.log("Error: "+err)
+			  }
+			})
+  }
+  
+  
+});
+</script>
+</head>
+<body>
+<br>
+&emsp;<img src="/logo.gif" width="300" height="44"/>
+<br>
+<div align="right">
+<i class="far fa-address-card"></i>&nbsp; <label id="pID" class="labelFont">JLxa231</label> &emsp; 
+<i class="fas fa-phone"></i>&nbsp; <label id="phone" class="labelFont" >+1(309)532-8416</label> &emsp; 
+<i class="fas fa-envelope"></i>&nbsp; <label id="email" class="labelFont">john_david@gmail.com</label> &nbsp; &nbsp; 
+</div>
+<ul>
+<li><b><label class="labelFont">Hi</label> <label id="fname" class="labelFont">John</label>&nbsp;<label id="lname" class="labelFont">David</label>!</b><li>
+</ul>
+<br>
+<center>
+<h3 style="text-shadow: 1px 1px 2px pink;"> Careplan Notification Simulator</h3> 
+<h4> <label id="careplan" style="font-family: 'Roboto', sans-serif;">Sprained Ankle </label></label><label style="font-family: 'Roboto', sans-serif;">- Care Plan</h4>
+</center>
+<br><br>
+
+<div class="outbox">
+<table cellspacing="10" bgcolor="#e6e6e6" style="border-radius: 10px;"align="center">
+<tr> 
+ 
+<div id="dialog">
+<br>
+  Did you apply cold/Ice Pack?
+</div>
+<td> Did you apply cold/Ice Pack? </td> 
+<td> 
+<select  required id="reminderType1" style="padding: 10px 10px;
+    margin: 8px 0;
+    display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="callConfirm" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+<div id="dialog-confirm"></div>
+<div id="popUp"></div>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><p id="demo" style="color: #4CAF50;"></p></td>
+</tr>
+<tr><td> Evaluate Mobility</td>
+<td><select  required id="reminderType2" style="padding: 10px 10px;
+    margin: 8px 0;
+    display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="switch-02" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+
+  </td>
+</tr>
+<tr><td></td>
+<td><p id="demo2" style="color: #4CAF50;"></p>
+<div id="mobilityDialog">
+    <table>
+	<tr>
+	<td>
+	Enter Mobility&emsp;
+	</td><td><input type="number" id="mobility" required bgcolor="#d9d9d9" placeholder="0-10" style="width: 200px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+ </table>
+</div>
+</tr>
+<tr></tr>
+<tr>
+<td> Schedule Xray/MRI </td>
+<td>
+<select required id="reminderType3" style="padding: 10px 10px;margin: 8px 0;display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="xraySwitch" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+</td>
+</tr>
+<tr><td></td>
+<td>
+<p id="demo3" style="color: #4CAF50;"></p>
+<table><td><input type="button" id="xraySwitch1" class="button2" value="Edit Appointment" style="display : none;"></td><td><i id="edit1" style="display : none;" class="far fa-edit"></i></td>
+</table>
+<div id="myDialog">
+    <table>
+    <table>
+	<tr>
+	<td>
+	Physician Name&emsp;
+	</td><td><input type="text" id="phyName" required bgcolor="#d9d9d9" placeholder="Enter Physician Name" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+<tr><td>Location&emsp;</td><td><input type="text" id="loc" required bgcolor="#d9d9d9" placeholder="Enter Location" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+   <tr><td> Time&emsp;</td><td><input type="datetime-local" id="time" required bgcolor="#d9d9d9" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+   </table>
+</div>
+<tr>
+<td> Drug Reminder: (<b id="drugName">Naproxen</b>) </td>
+<td> 
+<select required id="reminderType4" style="padding: 10px 10px;margin: 8px 0;display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="medSwitch" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+</td>
+</tr>
+<tr>
+<td></td>
+<td><p id="demo4" style="color: #4CAF50;"></p>
+<div id="medDialog">
+<br>
+    <table>
+	<tr><td>
+	Set Medication Reminder&emsp;</td><td>
+		<select style="width:185px;"  id="medicationAlert">
+            <option value=" "> Set Reminder </option>
+            <option value="1"> Every 1 hour </option>
+            <option value="3"> Every 3 hours </option>
+            <option value="6"> Every 6 hours </option>
+            <option value="12"> Every 12 hours </option>
+        </select>
+	</td></tr>
+	</table>
+</div>
+</tr>
+<tr>
+<td>
+Set Walk Alert</td>
+<td> 
+<select required id="reminderType5" style="padding: 10px 10px;margin: 8px 0;display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="walkSwitch" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+</td>
+</tr>
+<tr><td></td>
+<td> <p id="demo5" style="color: #4CAF50;"></p>
+<div id="walkDialog">
+    <table>
+	<tr>
+	 <td>
+        Set Walk Alert&emsp;</td>
+     <td>
+        <select style="width:135px;"  id="walkNotification">
+            <option value=" ">Set Reminder</option>
+            <option value="Yes"> Yes </option>
+            <option value="No"> No </option>
+        </select>
+     </td></tr>
+	</table>
+</div>
+<tr></tr>
+<tr>
+<td> Schedule OrthoSpecialist follow-Up visit </td>
+<td> 
+<select required id="reminderType6" style="padding: 10px 10px;margin: 8px 0;display: inline-block;"> 
+<option value=" "> Set Notification Preference </option>
+<option value="Message"> Via SMS Notifications</option>
+<option value="Email"> Via Email Notifications</option>
+<option value="Mobile"> Via Mobile push Notifications</option>
+<option value="Web"> Via Web Push Notifications</option>
+</select> &emsp;
+<input type="button" value="Push Notification" id="orthoSwitch" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="background-color:#0086b3;border-radius: 8px;">
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<p id="demo6" style="color: #4CAF50;"></p>
+<table><td><input type="button" id="orthoSwitch1" value="Edit Appointment" class="button button2" style="display : none;"></td><td><i id="edit2" style="display : none;" class="far fa-edit"></i></td></table>
+
+<div id="orthoDialog">
+    <table>
+	<tr><td>
+	Physician Name&emsp;
+	</td><td><input type="text" id="orthoPhyName" required bgcolor="#d9d9d9" placeholder="Enter Physician Name" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+<tr><td>Location&emsp;</td><td><input type="text" id="orthoLoc" required bgcolor="#d9d9d9" placeholder="Enter Location" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+   <tr><td> Time&emsp;</td><td><input type="datetime-local" id="orthoTime" required bgcolor="#d9d9d9" style="width: 270px;padding: 8px 20px;margin: 4px 0;display: inline-block;border: 1px solid #ccc;border-radius: 4px;box-sizing: border-box;"></td></tr>
+   </table>
+</div>
+</td></tr>
+<tr><td></td></tr>
+</table>
+<br style="line-height:10;">
+<hr><br style="line-height:3;">
+</div>
+</div>
+</body>
+</html>						
