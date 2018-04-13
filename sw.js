@@ -28,8 +28,8 @@ self.addEventListener('push', function(event) {
   const title = 'Push Codelab';
   const options = {
     body: 'Yay it works.',
-    icon: '/icon.png',
-    badge: '/badge.png'
+    icon: 'https://ibxportal.github.io/CarePlan/icon.png',
+    badge: 'https://ibxportal.github.io/CarePlan/badge.png'
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
